@@ -1,11 +1,11 @@
 	.file	"main.c"
-	.text
+	.text //Начало программы
 	.section	.rodata.str1.1,"aMS",@progbits,1
-.LC0:
+.LC0: // Текстовая константа
 	.string	"Cannot read all the data"
 	.section	.rodata.str1.8,"aMS",@progbits,1
 	.align 8
-.LC1:
+.LC1: // Текстовая константа
 	.string	"(SUBPROCESS) Fibonacci number %ld is %ld\n"
 	.text
 	.p2align 4
@@ -14,34 +14,34 @@
 run_fib:
 .LFB22:
 	.cfi_startproc
-	pushq	%rbx
+	pushq	%rbx // Сохранение значения регистра %rbx на стеке
 	.cfi_def_cfa_offset 16
 	.cfi_offset 3, -16
-	subq	$32, %rsp
+	subq	$32, %rsp // Выделение места на стеке для локальных переменных
 	.cfi_def_cfa_offset 48
-	movl	4+p(%rip), %edi
-	movq	%fs:40, %rax
-	movq	%rax, 24(%rsp)
-	xorl	%eax, %eax
-	movq	$0, 8(%rsp)
-	call	close@PLT
-	movl	p(%rip), %edi
+	movl	4+p(%rip), %edi // Загрузка первого аргумента (файловый дескриптор) в регистр %edi
+	movq	%fs:40, %rax // Получение значения текущего сегмента данных из таблицы дескриптеров
+	movq	%rax, 24(%rsp) 
+	xorl	%eax, %eax // Обнуляем EAX (для успешного возврата из функции)
+	movq	$0, 8(%rsp) 
+	call	close@PLT // Вызов функции close
+	movl	p(%rip), %edi 
 	leaq	8(%rsp), %rsi
 	movl	$8, %edx
 	call	read@PLT
 	movl	p(%rip), %edi
-	movq	%rax, %rbx
-	call	close@PLT
-	cmpq	$8, %rbx
-	jne	.L6
+	movq	%rax, %rbx // Сохранение количества прочитанных байт в регистр %rbx
+	call	close@PLT // Вызов функции close
+	cmpq	$8, %rbx // Сравнение количества прочитанных байт с 8
+	jne	.L6 // Переход к метке .L6
 	movq	8(%rsp), %rdi
 	call	fibonacci@PLT
 	movq	8(%rsp), %rsi
 	leaq	.LC1(%rip), %rdi
 	movq	%rax, %rdx
 	movq	%rax, 16(%rsp)
-	xorl	%eax, %eax
-	call	printf@PLT
+	xorl	%eax, %eax // Обнуляем EAX (для успешного возврата из функции)
+	call	printf@PLT // Вызов функции printf
 	movl	o(%rip), %edi
 	call	close@PLT
 	movl	4+o(%rip), %edi
@@ -53,18 +53,18 @@ run_fib:
 	movq	24(%rsp), %rax
 	subq	%fs:40, %rax
 	jne	.L7
-	addq	$32, %rsp
+	addq	$32, %rsp // Восстановление указателя стека
 	.cfi_remember_state
 	.cfi_def_cfa_offset 16
 	popq	%rbx
 	.cfi_def_cfa_offset 8
-	ret
+	ret // Возврат из функции
 .L6:
 	.cfi_restore_state
 	leaq	.LC0(%rip), %rdi
-	call	puts@PLT
+	call	puts@PLT // Вызов функции puts для вывода сообщения об ошибке
 	movl	$1, %edi
-	call	_exit@PLT
+	call	_exit@PLT // Вызов функции _exit для завершения процесса
 .L7:
 	call	__stack_chk_fail@PLT
 	.cfi_endproc
@@ -87,39 +87,39 @@ run_fib:
 main:
 .LFB23:
 	.cfi_startproc
-	pushq	%rbp
+	pushq	%rbp // Сохранение значения регистра %rbp на стеке
 	.cfi_def_cfa_offset 16
 	.cfi_offset 6, -16
 	leaq	.LC2(%rip), %rdi
 	pushq	%rbx
 	.cfi_def_cfa_offset 24
 	.cfi_offset 3, -24
-	subq	$24, %rsp
+	subq	$24, %rsp // Выделение места на стеке для локальных переменных
 	.cfi_def_cfa_offset 48
 	movq	%fs:40, %rax
 	movq	%rax, 8(%rsp)
-	xorl	%eax, %eax
+	xorl	%eax, %eax // Обнуляем EAX (для успешного возврата из функции)
 	call	puts@PLT
 	leaq	p(%rip), %rdi
-	call	pipe@PLT
+	call	pipe@PLT // Вызов функции pipe для создания канала
 	leaq	o(%rip), %rdi
-	call	pipe@PLT
-	call	fork@PLT
-	testl	%eax, %eax
-	jne	.L9
-	xorl	%eax, %eax
-	call	run_fib
+	call	pipe@PLT // Вызов функции pipe для создания канала
+	call	fork@PLT // Создание дочернего процесса
+	testl	%eax, %eax  // Обнуляем EAX (для успешного возврата из функции)
+	jne	.L9 // Переход к метке .L9
+	xorl	%eax, %eax // Обнуляем EAX (для успешного возврата из функции)
+	call	run_fib // Вызов функции run_fib в дочернем процессе
 .L10:
 	movq	8(%rsp), %rax
 	subq	%fs:40, %rax
-	jne	.L13
-	addq	$24, %rsp
+	jne	.L13 // Переход к метке .L13
+	addq	$24, %rsp // Восстановление указателя стека
 	.cfi_remember_state
 	.cfi_def_cfa_offset 24
-	xorl	%eax, %eax
-	popq	%rbx
+	xorl	%eax, %eax // Обнуляем EAX (для успешного возврата из функции)
+	popq	%rbx // Восстановление значения регистра %rbx
 	.cfi_def_cfa_offset 16
-	popq	%rbp
+	popq	%rbp // Восстановление значения регистра %rbp
 	.cfi_def_cfa_offset 8
 	ret
 .L9:
@@ -164,20 +164,20 @@ main:
 	.align 8
 	.type	n, @object
 	.size	n, 8
-n:
+n: //Создание переменной n
 	.quad	12
 	.globl	o
 	.bss
 	.align 8
 	.type	o, @object
 	.size	o, 8
-o:
+o: //Создание переменной o
 	.zero	8
 	.globl	p
 	.align 8
 	.type	p, @object
 	.size	p, 8
-p:
+p: //Создание переменной p
 	.zero	8
 	.ident	"GCC: (GNU) 13.2.1 20230801"
 	.section	.note.GNU-stack,"",@progbits
